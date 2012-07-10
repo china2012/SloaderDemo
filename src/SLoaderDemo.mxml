@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   creationComplete="application1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.sloader.SLoader;
+			import com.sloader.SLoaderEventType;
+			import com.sloader.SLoaderFile;
+			
+			import mx.events.FlexEvent;
+			
+			private var sloader:SLoader = new SLoader("shigongyu");
+			
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				for (var i:int=0; i<100; i++)
+				{
+					var fileVO:SLoaderFile = new SLoaderFile();
+					fileVO.name = "name"+i;
+					fileVO.title = "title"+i;
+					fileVO.url = "http://www.kaihua.gov.cn/images/t4.swf";
+					sloader.addFile(fileVO);
+				}
+				
+				sloader.addEventListener(SLoaderEventType.SLOADER_PROGRESS, onSloaderProgress);
+				
+				sloader.execute();
+			}
+			
+			private function onSloaderProgress(asd:int=1):void
+			{
+				shi.text = int(sloader.currLoadPercentage*100) + "%";
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Label id="shi" x="62" y="62" width="190" height="125" fontSize="30" text="标签"/>
+</s:Application>
