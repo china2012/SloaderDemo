@@ -1,10 +1,6 @@
 package com.sloader
 {
-	import com.sloader.loadhandlers.DAT_LoadHandler;
-	import com.sloader.loadhandlers.Image_LoadHandler;
 	import com.sloader.loadhandlers.LoadHandler;
-	import com.sloader.loadhandlers.SWF_LoadHandler;
-	import com.sloader.loadhandlers.XML_LoadHandler;
 	
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
@@ -13,13 +9,14 @@ package com.sloader
 	{
 		private var _appDomain:ApplicationDomain;
 		
-		private var _loadHandlers:Object;
 		private var _eventHandlers:Dictionary;
 		
 		private var _listLoaded:Array;
 		private var _listReadyLoad:Array;
 		
 		private var _loadInfo:SLoaderInfo;
+		
+		private var _sloaderManage:SLoaderManage;
 		
 		////////////////////////////////////////////////////////////////////////
 		private var _isLoading:Boolean = false;
@@ -39,29 +36,18 @@ package com.sloader
 		
 		public function SLoader(name:String, applicationDomain:ApplicationDomain=null)
 		{
-			SLoaderManage.addSLoader(name, this);
+			_sloaderManage = SLoaderManage.instance;
+			_sloaderManage.addSLoader(name, this);
 			
 			_appDomain = applicationDomain || new ApplicationDomain(ApplicationDomain.currentDomain);
 			
 			_eventHandlers = new Dictionary();
-			_loadHandlers = {};
 			_listLoaded = [];
 			_listReadyLoad = [];
 			_loadedBytes = 0;
 			_loadInfo = new SLoaderInfo();
 			
-			registerLoadHandler();
 			registerEventHandler();
-		}
-		
-		private function registerLoadHandler():void
-		{
-			_loadHandlers[SLoaderFileType.SWF.toLowerCase()] = SWF_LoadHandler;
-			_loadHandlers[SLoaderFileType.XML.toLowerCase()] = XML_LoadHandler;
-			_loadHandlers[SLoaderFileType.DAT.toLowerCase()] = DAT_LoadHandler;
-			_loadHandlers[SLoaderFileType.JPG.toLowerCase()] = Image_LoadHandler;
-			_loadHandlers[SLoaderFileType.PNG.toLowerCase()] = Image_LoadHandler;
-			_loadHandlers[SLoaderFileType.BMP.toLowerCase()] = Image_LoadHandler;
 		}
 		
 		private function registerEventHandler():void
@@ -147,8 +133,8 @@ package com.sloader
 		private function _execute(fileIndex:int):void
 		{
 			var fileVO:SLoaderFile = _listReadyLoad[fileIndex];
-			var fileType:String = getFileType(fileVO).toLowerCase();
-			var fileLoadHandlerClass:Class = _loadHandlers[fileType];
+			var fileType:String = _sloaderManage.getFileType(fileVO).toLowerCase();
+			var fileLoadHandlerClass:Class = _sloaderManage.getFileLoadHandler(fileType);
 			if (!fileLoadHandlerClass)
 			{
 				throw new Error("you not registered handler on ["+fileType+"]");
@@ -294,37 +280,20 @@ package com.sloader
 		
 		private function checkRepeatFileVO(fileVO:SLoaderFile):void
 		{
-			var file:SLoaderFile = SLoaderManage.getFileVO(fileVO.title);
-			if (file)
+			var globalHasFileVO:Boolean = _sloaderManage.getFileVO(fileVO.title) != null;
+			if (globalHasFileVO)
 				throw new Error("Duplication of add file(title:"+fileVO.title+")");
+			
+			for each(var file:SLoaderFile in _listReadyLoad)
+			{
+				if (file.title == fileVO.title)
+					throw new Error("Duplication of add file(title:"+fileVO.title+")");
+			}
 		}
 		
 		///////////////////////////////////////////////////////////////////////////
 		// get set
 		///////////////////////////////////////////////////////////////////////////		
-		private function getFileType(file:SLoaderFile):String
-		{
-			if (file.type)
-				return file.type;
-			else
-			{
-				var extensions:Array = file.url.match(/[^\.][^\.]*/g);
-				if (extensions)
-				{
-					if (extensions.length > 0)
-					{
-						var fileType:String = extensions[extensions.length-1];
-						for (var _fileType:* in _loadHandlers)
-						{
-							if (_fileType == fileType)
-								return _fileType;
-						}
-					}
-				}
-			}
-			return "swf";
-		}
-		
 		public function getFileVO(fileTitle:String):SLoaderFile
 		{
 			if (!_listLoaded)

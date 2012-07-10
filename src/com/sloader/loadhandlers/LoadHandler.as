@@ -1,8 +1,8 @@
 package com.sloader.loadhandlers
 {
-	import com.sloader.SLoaderFileInfo;
 	import com.sloader.SLoaderFile;
-
+	import com.sloader.SLoaderFileInfo;
+	
 	import flash.system.ApplicationDomain;
 
 	public class LoadHandler
@@ -44,6 +44,14 @@ package com.sloader.loadhandlers
 		public function load():void
 		{
 
+		}
+		
+		public function unLoad():void
+		{
+			_file.totalBytes = Number.NaN;
+			_file.loaderInfo.applicationDomain = null;
+			_file.loaderInfo.loadedBytes = 0;
+			_file.loaderInfo.totalBytes = 0;
 		}
 	}
 }

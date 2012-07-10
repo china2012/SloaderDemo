@@ -2,24 +2,27 @@ package com.sloader.loadhandlers
 {
 	import com.sloader.SLoaderError;
 	import com.sloader.SLoaderFile;
-
+	
 	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
+	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.system.ApplicationDomain;
 
-	public class Image_LoadHandler extends LoadHandler
+	public class URLLoader_Handler extends LoadHandler
 	{
-		public function Image_LoadHandler(fileVO:SLoaderFile, domain:ApplicationDomain)
+		public function URLLoader_Handler(fileVO:SLoaderFile, domain:ApplicationDomain)
 		{
 			super(fileVO, domain);
-			_file.loaderInfo.loader = new Loader();
-			_file.loaderInfo.loader.contentLoaderInfo.addEventListener(Event.OPEN, onFileStart);
-			_file.loaderInfo.loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, onFileProgress);
-			_file.loaderInfo.loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onFileComplete);
-			_file.loaderInfo.loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onFileIoError);
+			_file.loaderInfo.loadHandler = this;
+			
+			_file.loaderInfo.loader = new URLLoader();
+			_file.loaderInfo.loader.addEventListener(Event.OPEN, onFileStart);
+			_file.loaderInfo.loader.addEventListener(ProgressEvent.PROGRESS, onFileProgress);
+			_file.loaderInfo.loader.addEventListener(Event.COMPLETE, onFileComplete);
+			_file.loaderInfo.loader.addEventListener(IOErrorEvent.IO_ERROR, onFileIoError);
 		}
 
 		protected function onFileIoError(event:IOErrorEvent):void
@@ -60,6 +63,12 @@ package com.sloader.loadhandlers
 		{
 			var urlRequest:URLRequest = new URLRequest(_file.url);
 			_file.loaderInfo.loader.load(urlRequest);
+		}
+		
+		override public function unLoad():void
+		{
+			super.unLoad();
+			_file.loaderInfo.loader = null;
 		}
 	}
 }

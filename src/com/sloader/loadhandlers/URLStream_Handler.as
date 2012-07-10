@@ -2,7 +2,7 @@ package com.sloader.loadhandlers
 {
 	import com.sloader.SLoaderError;
 	import com.sloader.SLoaderFile;
-
+	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
@@ -11,11 +11,13 @@ package com.sloader.loadhandlers
 	import flash.net.URLStream;
 	import flash.system.ApplicationDomain;
 
-	public class DAT_LoadHandler extends LoadHandler
+	public class URLStream_Handler extends LoadHandler
 	{
-		public function DAT_LoadHandler(fileVO:SLoaderFile, domain:ApplicationDomain)
+		public function URLStream_Handler(fileVO:SLoaderFile, domain:ApplicationDomain)
 		{
 			super(fileVO, domain);
+			_file.loaderInfo.loadHandler = this;
+			
 			_file.loaderInfo.loader = new URLStream();
 			_file.loaderInfo.loader.addEventListener(Event.OPEN, onFileStart);
 			_file.loaderInfo.loader.addEventListener(ProgressEvent.PROGRESS, onFileProgress);
@@ -59,6 +61,12 @@ package com.sloader.loadhandlers
 		{
 			var urlRequest:URLRequest = new URLRequest(_file.url);
 			_file.loaderInfo.loader.load(urlRequest);
+		}
+		
+		override public function unLoad():void
+		{
+			super.unLoad();
+			_file.loaderInfo.loader = null;
 		}
 	}
 }

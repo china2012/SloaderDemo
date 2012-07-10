@@ -9,19 +9,26 @@
 			import com.sloader.SLoaderError;
 			import com.sloader.SLoaderEventType;
 			import com.sloader.SLoaderFile;
+			import com.sloader.SLoaderFileType;
 			import com.sloader.SLoaderInfo;
 			import com.sloader.SLoaderManage;
 			
 			import flash.sampler.Sample;
 			
+			import mx.core.UIComponent;
 			import mx.events.FlexEvent;
 			
 			public static var sloaderName:String = "sloaderDemo";
 			
 			private var sloader:SLoader;
 			
+			private var uiComponent:UIComponent;
+			
 			protected function application1_creationCompleteHandler(event:FlexEvent):void
 			{
+				uiComponent = new UIComponent();
+				addChild(uiComponent);
+				
 				sloader = new SLoader(sloaderName);
 				sloader.addEventListener(SLoaderEventType.FILE_ERROR, onLoadFileError);
 				loadConfig();
@@ -60,15 +67,14 @@
 			
 			private function loadFiles():void
 			{
-				var fileVO:SLoaderFile = SLoaderManage.getFileVO("config");
-//				var fileVO:SLoaderFile = sloader.getFileVO("config");
+				var fileVO:SLoaderFile = SLoaderManage.instance.getFileVO("config");
 				
 				var configXML:XML = new XML((fileVO.loaderInfo.loader as URLLoader).data);
 				for each(var item:Object in configXML.files.item)
 				{
 					var file:SLoaderFile = new SLoaderFile();
 					file.name = item.@name;
-					file.title = item.@title;
+					file.title = String(Math.random() * Math.random());
 					file.url = item.@url;
 					file.version = item.@version;
 					sloader.addFile(file);
@@ -85,7 +91,10 @@
 			
 			private function onFileComplete(fileVO:SLoaderFile):void
 			{
-				fileVO.loaderInfo.loader = null
+				if (SLoaderManage.instance.getFileType(fileVO) == SLoaderFileType.SWF)
+				{
+					
+				}
 			}
 			
 			private function onFilesSloaderStart(loadInfo:SLoaderInfo):void
@@ -102,6 +111,10 @@
 			private function onFilesSloaderComplete(loadInfo:SLoaderInfo):void
 			{
 				currLoadList = loadInfo.currLoadFileList;
+				
+				sloader.removeEventListener(SLoaderEventType.SLOADER_START, onFilesSloaderStart);
+				sloader.removeEventListener(SLoaderEventType.SLOADER_PROGRESS, onFilesSloaderProgress);
+				sloader.removeEventListener(SLoaderEventType.SLOADER_COMPLETE, onFilesSloaderComplete);
 			}
 			
 			private var currLoadList:Array;
@@ -110,9 +123,14 @@
 				for (var i:int=0; i<currLoadList.length; i++)
 				{
 					var fileVO:SLoaderFile = currLoadList[i];
-					trace(fileVO.name+"=null")
-					fileVO = null;
+					fileVO.loaderInfo.loadHandler.unLoad();
 				}
+			}
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				loadFiles();
 			}
 			
 		]]>
@@ -123,4 +141,5 @@
 	<s:Label id="progress" x="110" y="73" fontSize="30" text="标签"/>
 	<s:Label id="loadedData" x="110" y="150" fontSize="20" text="标签"/>
 	<s:Button x="429" y="99" label="卸载" click="button1_clickHandler(event)"/>
+	<s:Button x="430" y="160" label="再次加载" click="button2_clickHandler(event)"/>
 </s:Application>
