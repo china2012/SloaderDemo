@@ -1,38 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
-			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="600" minHeight="400"
 			   creationComplete="application1_creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
 			import com.sloader.SLoader;
+			import com.sloader.SLoaderError;
 			import com.sloader.SLoaderEventType;
 			import com.sloader.SLoaderFile;
+			import com.sloader.SLoaderInfo;
+			import com.sloader.SLoaderManage;
+			
+			import flash.sampler.Sample;
 			
 			import mx.events.FlexEvent;
 			
-			private var sloader:SLoader = new SLoader("shigongyu");
+			public static var sloaderName:String = "sloaderDemo";
+			
+			private var sloader:SLoader;
 			
 			protected function application1_creationCompleteHandler(event:FlexEvent):void
 			{
-				// TODO Auto-generated method stub
-				for (var i:int=0; i<100; i++)
-				{
-					var fileVO:SLoaderFile = new SLoaderFile();
-					fileVO.name = "name"+i;
-					fileVO.title = "title"+i;
-					fileVO.url = "http://www.kaihua.gov.cn/images/t4.swf";
-					sloader.addFile(fileVO);
-				}
+				sloader = new SLoader(sloaderName);
+				sloader.addEventListener(SLoaderEventType.FILE_ERROR, onLoadFileError);
+				loadConfig();
+			}
+			
+			private function onLoadFileError(error:SLoaderError):void
+			{
+				trace(error.file.name + "Load Error:" + error.desc);
+			}
+			
+			private function loadConfig():void
+			{
+				var configVO:SLoaderFile = new SLoaderFile();
+				configVO.name = "config";
+				configVO.title = "config";
+				configVO.url = "config.xml";
+				sloader.addFile(configVO);
 				
-				sloader.addEventListener(SLoaderEventType.SLOADER_PROGRESS, onSloaderProgress);
+				sloader.addEventListener(SLoaderEventType.FILE_START, onConfigStart);
+				sloader.addEventListener(SLoaderEventType.FILE_COMPLETE, onConfigComplete);
 				
 				sloader.execute();
 			}
 			
-			private function onSloaderProgress(asd:int=1):void
+			private function onConfigStart(fileVO:SLoaderFile):void
 			{
-				shi.text = int(sloader.currLoadPercentage*100) + "%";
+				sloader.removeEventListener(SLoaderEventType.FILE_START, onConfigStart);
+				trace("start load:" + fileVO.url);
+			}
+			
+			private function onConfigComplete(fileVO:SLoaderFile):void
+			{
+				sloader.removeEventListener(SLoaderEventType.FILE_COMPLETE, onConfigComplete);
+				loadFiles();
+			}
+			
+			private function loadFiles():void
+			{
+				var fileVO:SLoaderFile = SLoaderManage.getFileVO("config");
+//				var fileVO:SLoaderFile = sloader.getFileVO("config");
+				
+				var configXML:XML = new XML((fileVO.loaderInfo.loader as URLLoader).data);
+				for each(var item:Object in configXML.files.item)
+				{
+					var file:SLoaderFile = new SLoaderFile();
+					file.name = item.@name;
+					file.title = item.@title;
+					file.url = item.@url;
+					file.version = item.@version;
+					sloader.addFile(file);
+				}
+				
+				sloader.addEventListener(SLoaderEventType.FILE_COMPLETE, onFileComplete);
+				
+				sloader.addEventListener(SLoaderEventType.SLOADER_START, onFilesSloaderStart);
+				sloader.addEventListener(SLoaderEventType.SLOADER_PROGRESS, onFilesSloaderProgress);
+				sloader.addEventListener(SLoaderEventType.SLOADER_COMPLETE, onFilesSloaderComplete);
+				
+				sloader.execute();
+			}
+			
+			private function onFileComplete(fileVO:SLoaderFile):void
+			{
+				fileVO.loaderInfo.loader = null
+			}
+			
+			private function onFilesSloaderStart(loadInfo:SLoaderInfo):void
+			{
+				trace("start load files....");
+			}
+			
+			private function onFilesSloaderProgress(loadInfo:SLoaderInfo):void
+			{
+				progress.text = int(loadInfo.currLoadPercentage*100)+"%";
+				loadedData.text = loadInfo.currLoadedBytes/1024 + "KB";
+			}
+			
+			private function onFilesSloaderComplete(loadInfo:SLoaderInfo):void
+			{
+				currLoadList = loadInfo.currLoadFileList;
+			}
+			
+			private var currLoadList:Array;
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				for (var i:int=0; i<currLoadList.length; i++)
+				{
+					var fileVO:SLoaderFile = currLoadList[i];
+					trace(fileVO.name+"=null")
+					fileVO = null;
+				}
 			}
 			
 		]]>
@@ -40,5 +120,7 @@
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<s:Label id="shi" x="62" y="62" width="190" height="125" fontSize="30" text="标签"/>
+	<s:Label id="progress" x="110" y="73" fontSize="30" text="标签"/>
+	<s:Label id="loadedData" x="110" y="150" fontSize="20" text="标签"/>
+	<s:Button x="429" y="99" label="卸载" click="button1_clickHandler(event)"/>
 </s:Application>

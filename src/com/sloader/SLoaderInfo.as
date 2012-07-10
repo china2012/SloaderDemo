@@ -10,6 +10,8 @@ package com.sloader
 		public var currLoadedBytes:Number;
 		public var currTotalBytes:Number;
 
-		public var percentage:Number;
+		public var currLoadPercentage:Number;
+		
+		public var currLoadFileList:Array;
 	}
 }
