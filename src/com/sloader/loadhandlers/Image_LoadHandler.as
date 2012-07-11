@@ -17,13 +17,11 @@ package com.sloader.loadhandlers
 		public var bitmap:Bitmap;
 		
 		private var _loader:Loader;
-		private var _loaderContext:LoaderContext;
 		
 		public function Image_LoadHandler(fileVO:SLoaderFile, loaderContext:LoaderContext)
 		{
-			super(fileVO);
+			super(fileVO, loaderContext);
 			
-			_loaderContext = loaderContext;
 			_file.loaderInfo.loadHandler = this;
 			
 			_loader = new Loader();
@@ -79,6 +77,7 @@ package com.sloader.loadhandlers
 		{
 			super.unLoad();
 			_loader.unload();
+			bitmap = null;
 		}
 	}
 }

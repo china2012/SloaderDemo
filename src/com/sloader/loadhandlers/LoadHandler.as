@@ -8,16 +8,18 @@ package com.sloader.loadhandlers
 	public class LoadHandler
 	{
 		public var _file:SLoaderFile;
+		public var _loaderContext:LoaderContext;
 
 		public var _onFileComplete:Function = null;
 		public var _onFileProgress:Function = null;
 		public var _onFileStart:Function = null;
 		public var _onFileIoError:Function = null;
 
-		public function LoadHandler(fileVO:SLoaderFile)
+		public function LoadHandler(fileVO:SLoaderFile, loaderContext:LoaderContext)
 		{
 			_file = fileVO;
 			_file.loaderInfo = new SLoaderFileInfo();
+			_loaderContext = loaderContext;
 		}
 
 		public function setFileStartEventHandler(handler:Function):void

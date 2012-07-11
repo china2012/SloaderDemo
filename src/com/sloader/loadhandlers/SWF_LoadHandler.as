@@ -13,13 +13,11 @@ package com.sloader.loadhandlers
 	public class SWF_LoadHandler extends LoadHandler
 	{
 		private var _loader:Loader;
-		private var _loaderContext:LoaderContext;
 		
 		public function SWF_LoadHandler(fileVO:SLoaderFile, loaderContext:LoaderContext)
 		{
-			super(fileVO);
+			super(fileVO, loaderContext);
 			
-			_loaderContext = loaderContext;
 			_file.loaderInfo.loadHandler = this;
 			
 			_loader = new Loader();

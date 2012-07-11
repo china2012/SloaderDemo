@@ -18,13 +18,11 @@ package com.sloader.loadhandlers
 		public var data:ByteArray = new ByteArray();
 		
 		private var _loader:URLStream;
-		private var _loaderContext:LoaderContext;
 		
 		public function Binary_LoadHandler(fileVO:SLoaderFile, loaderContext:LoaderContext)
 		{
-			super(fileVO);
+			super(fileVO, loaderContext);
 
-			_loaderContext = loaderContext;
 			_file.loaderInfo.loadHandler = this;
 			
 			_loader = new URLStream();

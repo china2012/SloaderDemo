@@ -11,23 +11,14 @@ package com.sloader
 	{
 		private var _loaderContext:LoaderContext;
 		
-		// 当前系统信息映像
 		private var _loadInfo:SLoaderInfo;
 		
-		// 事件哈希表
 		private var _eventHandlers:Dictionary;
 		
-		// 所有已经加载成功的文件
 		private var _listLoaded:Array;
 		
-		// 当前队伍文件
-		// [队伍] = 每次执行execute()函数之前addFile or addFiles 的累加文件
 		private var _listReadyLoad:Array;
 		
-		// 存储加载文件的分组机制
-		private var _groups:Dictionary;
-		
-		// 并发加载机制
 		private const _concurrent:uint = 3;
 		
 		////////////////////////////////////////////////////////////////////////
@@ -64,7 +55,6 @@ package com.sloader
 			_listReadyLoad = [];
 			_loadedBytes = 0;
 			_loadInfo = new SLoaderInfo();
-			_groups = new Dictionary();
 		}
 		
 		private function registerEventHandler():void
@@ -139,13 +129,6 @@ package com.sloader
 			currLoadedFileCount = 0;
 			currTotalFileCount = _listReadyLoad.length;
 			
-			if (!_loadInfo.currLoadFileList)
-				_loadInfo.currLoadFileList = [];
-			else
-				_loadInfo.currLoadFileList.length = 0;
-			for (var i:int=0; i<currTotalFileCount; i++)
-				_loadInfo.currLoadFileList.push(_listReadyLoad[i]);
-			
 			_execute(currLoadedFileCount);
 		}
 		
@@ -212,9 +195,7 @@ package com.sloader
 			
 			_listLoaded.push(fileVO);
 			
-			if (!_groups[fileVO.group])
-				_groups[fileVO.group] = [];
-			_groups[fileVO.group].push(fileVO);
+			SLoaderManage.instance.addFileToGroup(fileVO.group, fileVO);
 			
 			var hasfile:Boolean = _currTotalFileCount > _currLoadedFileCount;
 			_isLoading = hasfile;
@@ -297,7 +278,13 @@ package com.sloader
 		
 		private function checkFileVO(fileVO:SLoaderFile):void
 		{
-			if (!fileVO.name || !fileVO.url || !fileVO.title)
+			if (
+				!fileVO.name || 
+				!fileVO.url || 
+				!fileVO.title || 
+				!fileVO.group ||
+				fileVO.group == ""
+			)
 				throw new Error("The fileVO parameter is incorrect");
 		}
 		

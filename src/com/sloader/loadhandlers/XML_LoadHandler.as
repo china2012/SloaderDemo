@@ -8,6 +8,7 @@ package com.sloader.loadhandlers
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.net.URLLoader;
+	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
@@ -25,6 +26,8 @@ package com.sloader.loadhandlers
 			_file.loaderInfo.loadHandler = this;
 			
 			_loader = new URLLoader();
+			_loader.dataFormat = URLLoaderDataFormat.TEXT;
+			
 			_loader.addEventListener(Event.OPEN, onFileStart);
 			_loader.addEventListener(ProgressEvent.PROGRESS, onFileProgress);
 			_loader.addEventListener(Event.COMPLETE, onFileComplete);
@@ -76,6 +79,7 @@ package com.sloader.loadhandlers
 		override public function unLoad():void
 		{
 			super.unLoad();
+			data = null;
 		}
 	}
 }
