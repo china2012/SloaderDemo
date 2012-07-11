@@ -15,7 +15,7 @@ package com.sloader.loadhandlers
 
 	public class Binary_LoadHandler extends LoadHandler
 	{
-		public var data:ByteArray;
+		public var data:ByteArray = new ByteArray();
 		
 		private var _loader:URLStream;
 		private var _loaderContext:LoaderContext;
