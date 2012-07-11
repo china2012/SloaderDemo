@@ -6,16 +6,19 @@ package com.sloader.loadhandlers
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
-	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.net.URLStream;
-	import flash.system.ApplicationDomain;
+	import flash.system.LoaderContext;
 
 	public class URLStream_Handler extends LoadHandler
 	{
-		public function URLStream_Handler(fileVO:SLoaderFile, domain:ApplicationDomain)
+		private var _loaderContext:LoaderContext;
+		
+		public function URLStream_Handler(fileVO:SLoaderFile, loaderContext:LoaderContext)
 		{
-			super(fileVO, domain);
+			super(fileVO);
+
+			_loaderContext = loaderContext;
 			_file.loaderInfo.loadHandler = this;
 			
 			_file.loaderInfo.loader = new URLStream();
@@ -29,32 +32,32 @@ package com.sloader.loadhandlers
 		{
 			var error:SLoaderError = new SLoaderError(_file, event.text);
 
-			if (_eventHandlerOnFileIoError != null)
-				_eventHandlerOnFileIoError(error);
+			if (_onFileIoError != null)
+				_onFileIoError(error);
 		}
 
 		protected function onFileComplete(event:Event):void
 		{
-			_file.totalBytes = event.currentTarget.bytesAvailable;
+			_file.size = event.currentTarget.bytesAvailable;
 
-			if (_eventHandlerOnFileComplete != null)
-				_eventHandlerOnFileComplete(_file);
+			if (_onFileComplete != null)
+				_onFileComplete(_file);
 		}
 
 		protected function onFileProgress(event:ProgressEvent):void
 		{
-			_file.totalBytes = event.bytesTotal;
+			_file.size = event.bytesTotal;
 			_file.loaderInfo.totalBytes = event.bytesTotal;
 			_file.loaderInfo.loadedBytes = event.bytesLoaded;
 
-			if (_eventHandlerOnFileProgress != null)
-				_eventHandlerOnFileProgress(_file);
+			if (_onFileProgress != null)
+				_onFileProgress(_file);
 		}
 
 		protected function onFileStart(event:Event):void
 		{
-			if (_eventHandlerOnFileStart != null)
-				_eventHandlerOnFileStart(_file);
+			if (_onFileStart != null)
+				_onFileStart(_file);
 		}
 
 		override public function load():void

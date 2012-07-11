@@ -13,9 +13,8 @@
 			import com.sloader.SLoaderInfo;
 			import com.sloader.SLoaderManage;
 			
-			import flash.sampler.Sample;
+			import fl.core.UIComponent;
 			
-			import mx.core.UIComponent;
 			import mx.events.FlexEvent;
 			
 			public static var sloaderName:String = "sloaderDemo";

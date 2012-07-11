@@ -46,11 +46,22 @@ package com.sloader
 			delete _sloaderInstanceList[sloaderName];
 		}
 
-		public function getSloaderInstance(sloaderName:String):SLoader
+		public function getSloader(sloaderName:String):SLoader
 		{
 			return _sloaderInstanceList[sloaderName];
 		}
-
+		
+		public function getFileCorrespondSloader(fileTitle:String):SLoader
+		{
+			for each(var sloader:SLoader in _sloaderInstanceList)
+			{
+				var fileVO:SLoaderFile = sloader.getFileVO(fileTitle);
+				if (fileVO)
+					return sloader;
+			}
+			return null;
+		}
+		
 		public function getFileVO(fileTitle:String, sloaderInstance:SLoader=null):SLoaderFile
 		{
 			if (sloaderInstance)
@@ -73,16 +84,12 @@ package com.sloader
 				return fileVO.type;
 			else
 			{
-				var extensions:Array = fileVO.url.match(/[^\.][^\.]*/g);
-				if (extensions)
-				{
-					if (extensions.length > 0)
-					{
-						var fileType:String = extensions[extensions.length-1];
-						if (_fileHandlers[fileType])
-							return fileType;
-					}	
-				}
+				var urlPath:Array = fileVO.url.split("/");
+				var fileName:String = urlPath.length>0 ? urlPath[urlPath.length-1]:fileVO.url;
+				fileName = String(fileName.match(/\.[^?]*/));
+				fileName = String(fileName.match(/[^\.].*/));
+				if (_fileHandlers[fileName])
+					return fileName;
 			}
 			return null;
 		}
@@ -92,8 +99,12 @@ package com.sloader
 			return _fileHandlers[fileType];
 		}
 		
-		public function unLoad(fileVO:SLoaderFile):void
+		public function unLoad(fileTitle:String):void
 		{
+			var fileVO:SLoaderFile = getFileVO(fileTitle);
+			if (!fileVO)
+				throw new Error("not has the file[title="+fileTitle+"] on all sloader loaded list");
+			
 			if (fileVO.loaderInfo)
 				fileVO.loaderInfo.loadHandler.unLoad();
 		}

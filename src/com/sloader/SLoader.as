@@ -3,11 +3,13 @@ package com.sloader
 	import com.sloader.loadhandlers.LoadHandler;
 	
 	import flash.system.ApplicationDomain;
+	import flash.system.LoaderContext;
+	import flash.system.SecurityDomain;
 	import flash.utils.Dictionary;
 
 	public class SLoader
 	{
-		private var _appDomain:ApplicationDomain;
+		private var _loaderContext:LoaderContext;
 		
 		private var _eventHandlers:Dictionary;
 		
@@ -34,12 +36,12 @@ package com.sloader
 		private var _currLoadPercentage:Number;
 		////////////////////////////////////////////////////////////////////////
 		
-		public function SLoader(name:String, applicationDomain:ApplicationDomain=null)
+		public function SLoader(name:String, loaderContext:LoaderContext=null)
 		{
 			_sloaderManage = SLoaderManage.instance;
 			_sloaderManage.addSLoader(name, this);
 			
-			_appDomain = applicationDomain || new ApplicationDomain(ApplicationDomain.currentDomain);
+			_loaderContext = new LoaderContext(false, ApplicationDomain.currentDomain, SecurityDomain.currentDomain) || loaderContext;
 			
 			_eventHandlers = new Dictionary();
 			_listLoaded = [];
@@ -105,15 +107,16 @@ package com.sloader
 			
 			_isLoading = true;
 			
+			currTotalBytes = 0;
 			for each(var fileVO:SLoaderFile in _listReadyLoad)
 			{
-				if (isNaN(fileVO.totalBytes))
+				if (isNaN(fileVO.size))
 				{
 					currTotalBytes = Number.NaN;
 					break;
 				}
 				else
-					currTotalBytes += fileVO.totalBytes;
+					currTotalBytes += fileVO.size;
 			}
 			
 			currLoadedBytes = 0;
@@ -141,7 +144,7 @@ package com.sloader
 			}
 			else
 			{
-				var loadHandler:LoadHandler = new fileLoadHandlerClass(fileVO, _appDomain);
+				var loadHandler:LoadHandler = new fileLoadHandlerClass(fileVO, _loaderContext);
 				loadHandler.setFileCompleteEventHandler(onFileComplete);
 				loadHandler.setFileProgressEventHandler(onFileProgress);
 				loadHandler.setFileStartEventHandler(onFileStart);
@@ -280,6 +283,7 @@ package com.sloader
 		
 		private function checkRepeatFileVO(fileVO:SLoaderFile):void
 		{
+			return;
 			var globalHasFileVO:Boolean = _sloaderManage.getFileVO(fileVO.title) != null;
 			if (globalHasFileVO)
 				throw new Error("Duplication of add file(title:"+fileVO.title+")");

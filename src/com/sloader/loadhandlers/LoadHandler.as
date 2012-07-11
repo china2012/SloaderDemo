@@ -3,42 +3,41 @@ package com.sloader.loadhandlers
 	import com.sloader.SLoaderFile;
 	import com.sloader.SLoaderFileInfo;
 	
-	import flash.system.ApplicationDomain;
+	import flash.system.LoaderContext;
 
 	public class LoadHandler
 	{
 		public var _file:SLoaderFile;
 
-		public var _eventHandlerOnFileComplete:Function = null;
-		public var _eventHandlerOnFileProgress:Function = null;
-		public var _eventHandlerOnFileStart:Function = null;
-		public var _eventHandlerOnFileIoError:Function = null;
+		public var _onFileComplete:Function = null;
+		public var _onFileProgress:Function = null;
+		public var _onFileStart:Function = null;
+		public var _onFileIoError:Function = null;
 
-		public function LoadHandler(fileVO:SLoaderFile, domain:ApplicationDomain)
+		public function LoadHandler(fileVO:SLoaderFile)
 		{
 			_file = fileVO;
 			_file.loaderInfo = new SLoaderFileInfo();
-			_file.loaderInfo.applicationDomain = domain;
 		}
 
 		public function setFileStartEventHandler(handler:Function):void
 		{
-			_eventHandlerOnFileStart = handler;
+			_onFileStart = handler;
 		}
 
 		public function setFileProgressEventHandler(handler:Function):void
 		{
-			_eventHandlerOnFileProgress = handler;
+			_onFileProgress = handler;
 		}
 
 		public function setFileCompleteEventHandler(handler:Function):void
 		{
-			_eventHandlerOnFileComplete = handler;
+			_onFileComplete = handler;
 		}
 
 		public function setFileIoErrorEventHandler(handler:Function):void
 		{
-			_eventHandlerOnFileIoError = handler;
+			_onFileIoError = handler;
 		}
 
 		public function load():void
@@ -48,8 +47,7 @@ package com.sloader.loadhandlers
 		
 		public function unLoad():void
 		{
-			_file.totalBytes = Number.NaN;
-			_file.loaderInfo.applicationDomain = null;
+			_file.size = Number.NaN;
 			_file.loaderInfo.loadedBytes = 0;
 			_file.loaderInfo.totalBytes = 0;
 		}
