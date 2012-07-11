@@ -6,10 +6,6 @@ package com.sloader
 
 	public class SLoaderFileInfo
 	{
-		// the loader Class may be (Loader, UrlLoader, Sound,,,,)
-		// changes according to file type
-		public var loader:*;
-		
 		// the file loaded size in current loading
 		public var loadedBytes:int;
 		

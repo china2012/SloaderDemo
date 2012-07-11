@@ -7,25 +7,28 @@ package com.sloader.loadhandlers
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
+	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
 
-	public class Loader_Handler extends LoadHandler
+	public class XML_LoadHandler extends LoadHandler
 	{
-		private var _loaderContext:LoaderContext;
+		public var data:XML;
+
+		private var _loader:URLLoader;
 		
-		public function Loader_Handler(fileVO:SLoaderFile, loaderContext:LoaderContext)
+		public function XML_LoadHandler(fileVO:SLoaderFile, loaderContext:LoaderContext)
 		{
 			super(fileVO);
 			
-			_loaderContext = loaderContext;
 			_file.loaderInfo.loadHandler = this;
 			
-			_file.loaderInfo.loader = new Loader();
-			_file.loaderInfo.loader.contentLoaderInfo.addEventListener(Event.OPEN, onFileStart);
-			_file.loaderInfo.loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, onFileProgress);
-			_file.loaderInfo.loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onFileComplete);
-			_file.loaderInfo.loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onFileIoError);
+			_loader = new URLLoader();
+			_loader.addEventListener(Event.OPEN, onFileStart);
+			_loader.addEventListener(ProgressEvent.PROGRESS, onFileProgress);
+			_loader.addEventListener(Event.COMPLETE, onFileComplete);
+			_loader.addEventListener(IOErrorEvent.IO_ERROR, onFileIoError);
 		}
 
 		protected function onFileIoError(event:IOErrorEvent):void
@@ -42,6 +45,8 @@ package com.sloader.loadhandlers
 			_file.loaderInfo.loadedBytes = event.currentTarget.bytesLoaded;
 			_file.loaderInfo.totalBytes = event.currentTarget.bytesTotal;
 
+			data = new XML(event.target.data);
+			
 			if (_onFileComplete != null)
 				_onFileComplete(_file);
 		}
@@ -65,13 +70,12 @@ package com.sloader.loadhandlers
 		override public function load():void
 		{
 			var urlRequest:URLRequest = new URLRequest(_file.url);
-			_file.loaderInfo.loader.load(urlRequest, _loaderContext);
+			_loader.load(urlRequest);
 		}
 		
 		override public function unLoad():void
 		{
 			super.unLoad();
-			Loader(_file.loaderInfo.loader).unload();
 		}
 	}
 }

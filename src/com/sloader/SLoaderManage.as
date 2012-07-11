@@ -1,26 +1,26 @@
 package com.sloader
 {
-	import com.sloader.loadhandlers.Loader_Handler;
-	import com.sloader.loadhandlers.URLLoader_Handler;
-	import com.sloader.loadhandlers.URLStream_Handler;
-
+	import com.sloader.loadhandlers.Image_LoadHandler;
+	import com.sloader.loadhandlers.SWF_LoadHandler;
+	import com.sloader.loadhandlers.XML_LoadHandler;
+	import com.sloader.loadhandlers.Binary_LoadHandler;
+	
 	public class SLoaderManage
 	{
 		private var _sloaderInstanceList:Object;
 		private var _fileHandlers:Object;
-
+		
 		public function SLoaderManage()
 		{
 			_sloaderInstanceList = {};
 			
 			_fileHandlers = {};
-			_fileHandlers[SLoaderFileType.SWF.toLowerCase()] = Loader_Handler;
-			_fileHandlers[SLoaderFileType.XML.toLowerCase()] = URLLoader_Handler;
-			_fileHandlers[SLoaderFileType.DAT.toLowerCase()] = URLStream_Handler;
-			_fileHandlers[SLoaderFileType.JPG.toLowerCase()] = Loader_Handler;
-			_fileHandlers[SLoaderFileType.PNG.toLowerCase()] = Loader_Handler;
-			_fileHandlers[SLoaderFileType.BMP.toLowerCase()] = Loader_Handler;
-			_fileHandlers[SLoaderFileType.CSS.toLowerCase()] = URLLoader_Handler;
+			_fileHandlers[SLoaderFileType.SWF.toLowerCase()] = SWF_LoadHandler;
+			_fileHandlers[SLoaderFileType.XML.toLowerCase()] = XML_LoadHandler;
+			_fileHandlers[SLoaderFileType.DAT.toLowerCase()] = Binary_LoadHandler;
+			_fileHandlers[SLoaderFileType.JPG.toLowerCase()] = Image_LoadHandler;
+			_fileHandlers[SLoaderFileType.PNG.toLowerCase()] = Image_LoadHandler;
+			_fileHandlers[SLoaderFileType.BMP.toLowerCase()] = Image_LoadHandler;
 		}
 		
 		private static var _instance:SLoaderManage;
@@ -45,7 +45,7 @@ package com.sloader
 		{
 			delete _sloaderInstanceList[sloaderName];
 		}
-
+		
 		public function getSloader(sloaderName:String):SLoader
 		{
 			return _sloaderInstanceList[sloaderName];

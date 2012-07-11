@@ -11,17 +11,27 @@ package com.sloader
 	{
 		private var _loaderContext:LoaderContext;
 		
-		private var _eventHandlers:Dictionary;
-		
-		private var _listLoaded:Array;
-		private var _listReadyLoad:Array;
-		
+		// 当前系统信息映像
 		private var _loadInfo:SLoaderInfo;
 		
-		private var _sloaderManage:SLoaderManage;
+		// 事件哈希表
+		private var _eventHandlers:Dictionary;
+		
+		// 所有已经加载成功的文件
+		private var _listLoaded:Array;
+		
+		// 当前队伍文件
+		// [队伍] = 每次执行execute()函数之前addFile or addFiles 的累加文件
+		private var _listReadyLoad:Array;
+		
+		// 存储加载文件的分组机制
+		private var _groups:Dictionary;
+		
+		// 并发加载机制
+		private const _concurrent:uint = 3;
 		
 		////////////////////////////////////////////////////////////////////////
-		private var _isLoading:Boolean = false;
+		private var _isLoading:Boolean;
 		
 		private var _lastProgressLoadedBytes:Number;
 		
@@ -32,28 +42,34 @@ package com.sloader
 		
 		private var _currTotalBytes:Number;
 		private var _currLoadedBytes:Number;
-		
+
 		private var _currLoadPercentage:Number;
 		////////////////////////////////////////////////////////////////////////
 		
 		public function SLoader(name:String, loaderContext:LoaderContext=null)
 		{
-			_sloaderManage = SLoaderManage.instance;
-			_sloaderManage.addSLoader(name, this);
+			SLoaderManage.instance.addSLoader(name, this);
 			
-			_loaderContext = new LoaderContext(false, ApplicationDomain.currentDomain, SecurityDomain.currentDomain) || loaderContext;
+			_loaderContext = loaderContext ? loaderContext:new LoaderContext(false, ApplicationDomain.currentDomain, SecurityDomain.currentDomain);
 			
-			_eventHandlers = new Dictionary();
+			registerEventHandler();
+			
+			initializePar();
+		}
+		
+		private function initializePar():void
+		{
+			_isLoading = false;
 			_listLoaded = [];
 			_listReadyLoad = [];
 			_loadedBytes = 0;
 			_loadInfo = new SLoaderInfo();
-			
-			registerEventHandler();
+			_groups = new Dictionary();
 		}
 		
 		private function registerEventHandler():void
 		{
+			_eventHandlers = new Dictionary();
 			_eventHandlers[SLoaderEventType.FILE_COMPLETE] = [];
 			_eventHandlers[SLoaderEventType.FILE_ERROR] =  [];
 			_eventHandlers[SLoaderEventType.FILE_PROGRESS] = [];
@@ -136,8 +152,8 @@ package com.sloader
 		private function _execute(fileIndex:int):void
 		{
 			var fileVO:SLoaderFile = _listReadyLoad[fileIndex];
-			var fileType:String = _sloaderManage.getFileType(fileVO).toLowerCase();
-			var fileLoadHandlerClass:Class = _sloaderManage.getFileLoadHandler(fileType);
+			var fileType:String = SLoaderManage.instance.getFileType(fileVO).toLowerCase();
+			var fileLoadHandlerClass:Class = SLoaderManage.instance.getFileLoadHandler(fileType);
 			if (!fileLoadHandlerClass)
 			{
 				throw new Error("you not registered handler on ["+fileType+"]");
@@ -169,7 +185,7 @@ package com.sloader
 			if (!_eventHandlers[type])
 				return;
 			
-			var index:int = (_eventHandlers[type] as Array).indexOf(handler);
+			var index:int = _eventHandlers[type].indexOf(handler);
 			if (index != -1)
 				_eventHandlers[type].splice(index, 1);
 		}
@@ -195,6 +211,10 @@ package com.sloader
 			currLoadedFileCount ++;
 			
 			_listLoaded.push(fileVO);
+			
+			if (!_groups[fileVO.group])
+				_groups[fileVO.group] = [];
+			_groups[fileVO.group].push(fileVO);
 			
 			var hasfile:Boolean = _currTotalFileCount > _currLoadedFileCount;
 			_isLoading = hasfile;
@@ -283,8 +303,7 @@ package com.sloader
 		
 		private function checkRepeatFileVO(fileVO:SLoaderFile):void
 		{
-			return;
-			var globalHasFileVO:Boolean = _sloaderManage.getFileVO(fileVO.title) != null;
+			var globalHasFileVO:Boolean = SLoaderManage.instance.getFileVO(fileVO.title) != null;
 			if (globalHasFileVO)
 				throw new Error("Duplication of add file(title:"+fileVO.title+")");
 			
