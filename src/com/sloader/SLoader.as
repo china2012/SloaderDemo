@@ -33,6 +33,8 @@ package com.sloader
 		
 		private var _currTotalBytes:Number;
 		private var _currLoadedBytes:Number;
+		
+		private var _currLoadingFiles:Array;
 
 		private var _currLoadPercentage:Number;
 		////////////////////////////////////////////////////////////////////////
@@ -54,6 +56,7 @@ package com.sloader
 			_listLoaded = [];
 			_listReadyLoad = [];
 			_loadedBytes = 0;
+			_currLoadingFiles = [];
 			_loadInfo = new SLoaderInfo();
 		}
 		
@@ -136,14 +139,14 @@ package com.sloader
 		{
 			var fileVO:SLoaderFile = _listReadyLoad[fileIndex];
 			var fileType:String = SLoaderManage.instance.getFileType(fileVO).toLowerCase();
-			var fileLoadHandlerClass:Class = SLoaderManage.instance.getFileLoadHandler(fileType);
-			if (!fileLoadHandlerClass)
+			var loadHandlerClass:Class = SLoaderManage.instance.getFileLoadHandler(fileType);
+			if (!loadHandlerClass)
 			{
 				throw new Error("you not registered handler on ["+fileType+"]");
 			}
 			else
 			{
-				var loadHandler:LoadHandler = new fileLoadHandlerClass(fileVO, _loaderContext);
+				var loadHandler:LoadHandler = new loadHandlerClass(fileVO, _loaderContext);
 				loadHandler.setFileCompleteEventHandler(onFileComplete);
 				loadHandler.setFileProgressEventHandler(onFileProgress);
 				loadHandler.setFileStartEventHandler(onFileStart);
@@ -281,15 +284,16 @@ package com.sloader
 			if (
 				!fileVO.name || 
 				!fileVO.url || 
-				!fileVO.title || 
-				!fileVO.group ||
-				fileVO.group == ""
+				!fileVO.title// || 
+//				!fileVO.group ||
+//				fileVO.group == ""
 			)
 				throw new Error("The fileVO parameter is incorrect");
 		}
 		
 		private function checkRepeatFileVO(fileVO:SLoaderFile):void
 		{
+			return;
 			var globalHasFileVO:Boolean = SLoaderManage.instance.getFileVO(fileVO.title) != null;
 			if (globalHasFileVO)
 				throw new Error("Duplication of add file(title:"+fileVO.title+")");

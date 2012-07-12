@@ -21,7 +21,7 @@ package com.sloader.loadhandlers
 		
 		public function XML_LoadHandler(fileVO:SLoaderFile, loaderContext:LoaderContext)
 		{
-			super(fileVO);
+			super(fileVO, loaderContext);
 			
 			_file.loaderInfo.loadHandler = this;
 			

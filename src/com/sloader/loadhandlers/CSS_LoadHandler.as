@@ -72,7 +72,7 @@ package com.sloader.loadhandlers
 		override public function load():void
 		{
 			var urlRequest:URLRequest = new URLRequest(_file.url);
-			_loader.load(urlRequest, _loaderContext);
+			_loader.load(urlRequest);
 		}
 		
 		override public function unLoad():void
