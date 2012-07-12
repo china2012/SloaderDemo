@@ -1,4 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" minWidth="955" minHeight="600">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" minWidth="955" minHeight="600"
+				creationComplete="application1_creationCompleteHandler(event)">
+	<mx:Script>
+		<![CDATA[
+			import com.sloader.SLoader;
+			import com.sloader.SLoaderError;
+			import com.sloader.SLoaderEventType;
+			import com.sloader.SLoaderFile;
+			import com.sloader.SLoaderManage;
+			import com.sloader.loadhandlers.XML_LoadHandler;
+			
+			import mx.events.FlexEvent;
+			
+			////////////////////////////////////////////////////////////////////////////////////
+			private var sloader:SLoader;
+			
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{
+				sloader = new SLoader("sloader");
+				
+				loadConfig();
+			}
+			
+			private function loadConfig():void
+			{
+				// TODO Auto Generated method stub
+				var fileVO:SLoaderFile = new SLoaderFile();
+				fileVO.name = "config";
+				fileVO.title = "config";
+				fileVO.group = "xml";
+				fileVO.url = "assets/config.xml";
+				
+				sloader.addFile(fileVO);
+				
+				sloader.addEventListener(SLoaderEventType.FILE_START, onConfigFileStart);
+				sloader.addEventListener(SLoaderEventType.FILE_COMPLETE, onConfigFileComplete);
+				sloader.addEventListener(SLoaderEventType.FILE_ERROR, onLoadFileError);
+				
+				sloader.execute();
+			}
+			
+			private function onLoadFileError(error:SLoaderError):void
+			{
+				trace("加载失败" + error.desc);
+			}
+			
+			private function onConfigFileStart(fileVO:SLoaderFile):void
+			{
+				trace(fileVO.name + "开始加载..");
+				sloader.removeEventListener(SLoaderEventType.FILE_START, onConfigFileStart);
+			}
+			
+			private function onConfigFileComplete(fileVO:SLoaderFile):void
+			{
+				sloader.removeEventListener(SLoaderEventType.FILE_COMPLETE, onConfigFileComplete);
+				
+//				trace(fileVO.name + "加载成功,开始加载模块文件数据...");
+				loadFiles();
+			}
+			
+			private function loadFiles():void
+			{
+				var config:SLoaderFile = SLoaderManage.instance.getFileVO("config");
+				var xml:XML = XML_LoadHandler(config.loaderInfo.loadHandler).data;
+				for each(var item:XML in xml.files.item)
+				{
+					var fileVO:SLoaderFile = new SLoaderFile();
+					fileVO.name = String(item.@name);
+					fileVO.title = String(item.@title);
+					fileVO.group = String(item.@group);
+					fileVO.url = String(item.@url);
+					sloader.addFile(fileVO);
+				}
+				
+				sloader.addEventListener(SLoaderEventType.FILE_COMPLETE, onFileComplete);
+				
+				sloader.execute();
+			}
+			
+			private function onFileComplete(fileVO:SLoaderFile):void
+			{
+				
+			}
+			
+		]]>
+	</mx:Script>
 	
 </mx:Application>

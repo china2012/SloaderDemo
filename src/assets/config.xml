@@ -1,1 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<files>
+		<item name="file1" title="file1" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file01" title="file01" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file11" title="file11" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file21" title="file21" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file31" title="file31" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file41" title="file41" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file51" title="file51" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file61" title="file61" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file71" title="file71" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file81" title="file81" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file91" title="file91" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file101" title="file101" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file111" title="file111" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file121" title="file121" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file131" title="file131" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file141" title="file141" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file151" title="file151" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file161" title="file161" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file171" title="file171" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file181" title="file181" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file191" title="file191" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file201" title="file201" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file211" title="file211" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file221" title="file221" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file231" title="file231" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file241" title="file241" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file251" title="file251" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file261" title="file261" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file271" title="file271" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file281" title="file281" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file291" title="file291" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file301" title="file301" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file311" title="file311" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file321" title="file321" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file331" title="file331" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file341" title="file341" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file351" title="file351" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file361" title="file361" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file371" title="file371" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file381" title="file381" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file391" title="file391" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file401" title="file401" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file411" title="file411" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file421" title="file421" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file431" title="file431" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file441" title="file441" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file451" title="file451" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file461" title="file461" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file471" title="file471" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file481" title="file481" url="assets/swf/mail.swf" group="swf"></item>
+		<item name="file491" title="file491" url="assets/swf/mail.swf" group="swf"></item>
+	</files>
+</root>
