@@ -24,7 +24,7 @@ package com.sloader
 		////////////////////////////////////////////////////////////////////////
 		private var _isLoading:Boolean;
 		
-		private var _lastProgressLoadedBytes:Number;
+		private var _lastProgressLoadedBytes:Object;
 		
 		private var _currLoadFiles:Array;
 		private var _currLoadedFiles:Array;
@@ -61,8 +61,12 @@ package com.sloader
 			
 			_loadedBytes = 0;
 			_currLoadErrorFiles = [];
+			
 			_loadInfo = new SLoaderInfo();
+			_loadInfo.loaderContext = _loaderContext;
 			_loadInfo.currLoadingFiles = [];
+			
+			_lastProgressLoadedBytes = {};
 		}
 		
 		private function registerEventHandler():void
@@ -126,7 +130,7 @@ package com.sloader
 			currTotalBytes = 0;
 			for each(var fileVO:SLoaderFile in _currLoadFiles)
 			{
-				if (isNaN(fileVO.size)){
+				if (isNaN(fileVO.size) || fileVO.size <= 0){
 					currTotalBytes = Number.NaN;
 					break;
 				}else{
@@ -135,6 +139,8 @@ package com.sloader
 			}
 			
 			currLoadedBytes = 0;
+			
+			_loadInfo.currTotalFileCount = _currLoadFiles.length;
 			
 			_currLoadedFiles.length = 0;
 			
@@ -199,10 +205,8 @@ package com.sloader
 		
 		private function onFileStart(fileVO:SLoaderFile):void
 		{
-			_lastProgressLoadedBytes = 0;
-			
 			if (_currLoadedFiles.length == 0)
-				onSloaderStart(fileVO);
+				onSloaderStart();
 
 			executeHandlers(_eventHandlers[SLoaderEventType.FILE_START], fileVO);
 		}
@@ -219,14 +223,28 @@ package com.sloader
 			
 			_loadedFiles.push(fileVO);
 			
+			_loadInfo.currLoadedFileCount = _currLoadedFiles.length;
+			
+			_loadInfo.loadedFileCount = _loadedFiles.length;
+			
 			var loadingIndex:int = _currLoadingFiles.indexOf(fileVO);
 			if (loadingIndex != -1)
+			{
 				_currLoadingFiles.splice(loadingIndex, 1);
+				
+				if (_loadInfo.currLoadingFiles)
+				var infoLoadingIndex:int = _loadInfo.currLoadingFiles.indexOf(fileVO);
+				if (infoLoadingIndex != -1)
+					_loadInfo.currLoadingFiles.splice(infoLoadingIndex, 1);
+			}
 			
 			SLoaderManage.instance.addFileToGroup(fileVO.group, fileVO);
 			
 			var hasfile:Boolean = _currLoadFiles.length > _currLoadedFiles.length;
 			_isLoading = hasfile;
+			
+			if (!hasfile)
+				_currLoadFiles.length = 0;
 			
 			executeHandlers(_eventHandlers[SLoaderEventType.FILE_COMPLETE], fileVO);
 			
@@ -235,7 +253,7 @@ package com.sloader
 			executeConcurrent();
 			
 			if (!hasfile)
-				onSloaderComplete(fileVO);
+				onSloaderComplete();
 		}
 		
 		private function onFileIoError(error:SLoaderError):void
@@ -244,7 +262,14 @@ package com.sloader
 			
 			var loadingIndex:int = _currLoadingFiles.indexOf(error.file);
 			if (loadingIndex != -1)
+			{
 				_currLoadingFiles.splice(loadingIndex, 1);
+				
+				if (_loadInfo.currLoadingFiles)
+					var infoLoadingIndex:int = _loadInfo.currLoadingFiles.indexOf(error.file);
+				if (infoLoadingIndex != -1)
+					_loadInfo.currLoadingFiles.splice(infoLoadingIndex, 1);
+			}
 			
 			var hasfile:Boolean = _currLoadFiles.length > _currLoadedFiles.length;
 			_isLoading = hasfile;
@@ -252,19 +277,22 @@ package com.sloader
 			executeHandlers(_eventHandlers[SLoaderEventType.FILE_ERROR], error);
 			
 			if (!hasfile)
-				onSloaderComplete(error.file);
+				onSloaderComplete();
 		}
 		
-		private function onSloaderStart(currFileVO:SLoaderFile):void
+		private function onSloaderStart():void
 		{
 			executeHandlers(_eventHandlers[SLoaderEventType.SLOADER_START], _loadInfo);
 		}
 		
 		private function onSloaderProgress(currFileVO:SLoaderFile):void
 		{
-			_lastProgressLoadedBytes = currFileVO.loaderInfo.loadedBytes - _lastProgressLoadedBytes;
-			currLoadedBytes += _lastProgressLoadedBytes;
-			loadedBytes += _lastProgressLoadedBytes;
+			if (isNaN(Number( _lastProgressLoadedBytes[currFileVO.title] )))
+				_lastProgressLoadedBytes[currFileVO.title] = 0;
+			
+			_lastProgressLoadedBytes[currFileVO.title] = currFileVO.loaderInfo.loadedBytes - Number(_lastProgressLoadedBytes[currFileVO.title]);
+			currLoadedBytes += Number(_lastProgressLoadedBytes[currFileVO.title]);
+			loadedBytes += Number(_lastProgressLoadedBytes[currFileVO.title]);
 			if (isNaN(_currTotalBytes))
 			{
 				currLoadPercentage = _currLoadedFiles.length/_currLoadFiles.length
@@ -274,18 +302,15 @@ package com.sloader
 			{
 				currLoadPercentage = _currLoadedBytes/_currTotalBytes;
 			}
-			_lastProgressLoadedBytes = currFileVO.loaderInfo.loadedBytes;
+			_lastProgressLoadedBytes[currFileVO.title] = currFileVO.loaderInfo.loadedBytes;
 			
 			executeHandlers(_eventHandlers[SLoaderEventType.SLOADER_PROGRESS], _loadInfo);
 		}
 		
-		private function onSloaderComplete(currFileVO:SLoaderFile):void
+		private function onSloaderComplete():void
 		{
 			executeHandlers(_eventHandlers[SLoaderEventType.SLOADER_COMPLETE], _loadInfo);
-			
-			_currLoadFiles.length = 0;
 		}
-		
 		
 		private function executeHandlers(handlers:Array, file:*):void
 		{
@@ -315,8 +340,13 @@ package com.sloader
 					){
 						_currLoadingFiles.push(file);
 						readyFileVO = file;
-//						trace("【并发机制】添加["+file.name+"]----当前并发["+_currLoadingFiles.length+"], 系统允许最高["+(_concurrent > rest ? rest:_concurrent)+"]");
 						
+						// 更新loadInfo属性映射
+						if (!_loadInfo.currLoadingFiles)
+							_loadInfo.currLoadingFiles = [];
+						_loadInfo.currLoadingFiles.push(file);
+						
+//						trace("【并发机制】新增文件下载["+file.name+"]----当前并发["+_currLoadingFiles.length+"], 系统允许最高["+(_concurrent > rest ? rest:_concurrent)+"]");
 						break;
 					}
 				}
@@ -362,7 +392,7 @@ package com.sloader
 		
 		///////////////////////////////////////////////////////////////////////////
 		// get set
-		///////////////////////////////////////////////////////////////////////////		
+		///////////////////////////////////////////////////////////////////////////	
 		public function getFileVO(fileTitle:String):SLoaderFile
 		{
 			if (!_loadedFiles)
@@ -381,10 +411,15 @@ package com.sloader
 			return _loadInfo;
 		}
 		
+		public function get isLoading():Boolean
+		{
+			return _isLoading;
+		}
+		
 		private function set loadedBytes(value:Number):void
 		{
 			_loadedBytes = value;
-			_loadInfo.loadedBytes = value;
+			_loadInfo.loadedBytes = _loadedBytes;
 		}
 		
 		private function get loadedBytes():Number
@@ -395,7 +430,7 @@ package com.sloader
 		private function set currLoadedBytes(value:Number):void
 		{
 			_currLoadedBytes = value;
-			_loadInfo.currLoadedBytes = value;
+			_loadInfo.currLoadedBytes = _currLoadedBytes;
 		}
 		
 		private function get currLoadedBytes():Number
@@ -423,11 +458,6 @@ package com.sloader
 		private function get currLoadPercentage():Number
 		{
 			return _currLoadPercentage;
-		}
-		
-		public function get isLoading():Boolean
-		{
-			return _isLoading;
 		}
 	}
 }

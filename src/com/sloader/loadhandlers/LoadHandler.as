@@ -7,13 +7,13 @@ package com.sloader.loadhandlers
 
 	public class LoadHandler
 	{
-		public var _file:SLoaderFile;
-		public var _loaderContext:LoaderContext;
+		protected var _file:SLoaderFile;
+		protected var _loaderContext:LoaderContext;
 
-		public var _onFileComplete:Function = null;
-		public var _onFileProgress:Function = null;
-		public var _onFileStart:Function = null;
-		public var _onFileIoError:Function = null;
+		protected var _onFileComplete:Function = null;
+		protected var _onFileProgress:Function = null;
+		protected var _onFileStart:Function = null;
+		protected var _onFileIoError:Function = null;
 
 		public function LoadHandler(fileVO:SLoaderFile, loaderContext:LoaderContext)
 		{
