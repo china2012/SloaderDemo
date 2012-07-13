@@ -11,7 +11,7 @@ package com.sloader
 		/**
 		 * Sloader已经加载的文件总数量 -
 		 */		
-		public var loadedFileCount:int;
+		public var loadedFilesCount:int;
 		
 		/**
 		 * Sloader已经加载的文件总字节数 -
@@ -21,12 +21,12 @@ package com.sloader
 		/**
 		 * 本次加载队列已经加载的文件数量 -
 		 */		
-		public var currLoadedFileCount:int;
+		public var currLoadedFilesCount:int;
 		
 		/**
 		 * 本次加载队列的所有文件数量 -
 		 */		
-		public var currTotalFileCount:int;
+		public var currTotalFilesCount:int;
 		
 		/**
 		 * 本次加载队列已经加载的文件字节数 -

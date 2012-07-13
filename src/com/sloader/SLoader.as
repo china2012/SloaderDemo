@@ -28,12 +28,16 @@ package com.sloader
 		
 		private var _currLoadFiles:Array;
 		private var _currLoadedFiles:Array;
+		private var _currLoadingFiles:Array;
 		private var _currLoadErrorFiles:Array;
+		
+		private var _currLoadFilesCount:uint;
+		private var _currLoadedFilesCount:uint;
+		private var _currLoadingFilesCount:uint;
+		private var _currLoadErrorFilesCount:uint;
 		
 		private var _currTotalBytes:Number;
 		private var _currLoadedBytes:Number;
-		
-		private var _currLoadingFiles:Array;
 
 		private var _currLoadPercentage:Number;
 		////////////////////////////////////////////////////////////////////////
@@ -140,11 +144,17 @@ package com.sloader
 			
 			currLoadedBytes = 0;
 			
-			_loadInfo.currTotalFileCount = _currLoadFiles.length;
+			_loadInfo.currTotalFilesCount = _currLoadFiles.length;
 			
 			_currLoadedFiles.length = 0;
 			
 			_currLoadErrorFiles.length = 0;
+
+			_currLoadFilesCount = _currLoadFiles.length;
+			
+			_currLoadErrorFilesCount = 0;
+			
+			_currLoadedFilesCount = 0;
 			
 			//////////////////////////////////
 			// 开始加载
@@ -223,14 +233,17 @@ package com.sloader
 			
 			_loadedFiles.push(fileVO);
 			
-			_loadInfo.currLoadedFileCount = _currLoadedFiles.length;
+			_loadInfo.currLoadedFilesCount = _currLoadedFiles.length;
 			
-			_loadInfo.loadedFileCount = _loadedFiles.length;
+			_loadInfo.loadedFilesCount = _loadedFiles.length;
+			
+			_currLoadedFilesCount = _loadedFiles.length;
 			
 			var loadingIndex:int = _currLoadingFiles.indexOf(fileVO);
 			if (loadingIndex != -1)
 			{
 				_currLoadingFiles.splice(loadingIndex, 1);
+				_currLoadingFilesCount = _currLoadingFiles.length;
 				
 				if (_loadInfo.currLoadingFiles)
 				var infoLoadingIndex:int = _loadInfo.currLoadingFiles.indexOf(fileVO);
@@ -240,7 +253,7 @@ package com.sloader
 			
 			SLoaderManage.instance.addFileToGroup(fileVO.group, fileVO);
 			
-			var hasfile:Boolean = _currLoadFiles.length > _currLoadedFiles.length;
+			var hasfile:Boolean = _currLoadFilesCount > _currLoadedFilesCount;
 			_isLoading = hasfile;
 			
 			if (!hasfile)
@@ -260,10 +273,13 @@ package com.sloader
 		{
 			_currLoadErrorFiles.push(error.file);
 			
+			_currLoadErrorFilesCount = _currLoadErrorFiles.length;
+			
 			var loadingIndex:int = _currLoadingFiles.indexOf(error.file);
 			if (loadingIndex != -1)
 			{
 				_currLoadingFiles.splice(loadingIndex, 1);
+				_currLoadingFilesCount = _currLoadingFiles.length;
 				
 				if (_loadInfo.currLoadingFiles)
 					var infoLoadingIndex:int = _loadInfo.currLoadingFiles.indexOf(error.file);
@@ -271,7 +287,7 @@ package com.sloader
 					_loadInfo.currLoadingFiles.splice(infoLoadingIndex, 1);
 			}
 			
-			var hasfile:Boolean = _currLoadFiles.length > _currLoadedFiles.length;
+			var hasfile:Boolean = _currLoadFilesCount > _currLoadedFilesCount;
 			_isLoading = hasfile;
 			
 			executeHandlers(_eventHandlers[SLoaderEventType.FILE_ERROR], error);
@@ -295,8 +311,8 @@ package com.sloader
 			loadedBytes += Number(_lastProgressLoadedBytes[currFileVO.title]);
 			if (isNaN(_currTotalBytes))
 			{
-				currLoadPercentage = _currLoadedFiles.length/_currLoadFiles.length
-					+ currFileVO.loaderInfo.loadedBytes/currFileVO.loaderInfo.totalBytes/_currLoadFiles.length;
+				currLoadPercentage = _currLoadedFilesCount/_currLoadFilesCount
+					+ currFileVO.loaderInfo.loadedBytes/currFileVO.loaderInfo.totalBytes/_currLoadFilesCount;
 			}
 			else
 			{
@@ -326,8 +342,8 @@ package com.sloader
 		///////////////////////////////////////////////////////////////////////////
 		private function executeConcurrent():void
 		{
-			var rest:int = _currLoadFiles.length - _currLoadedFiles.length - _currLoadErrorFiles.length;
-			while (_currLoadingFiles.length < (_concurrent>rest ? rest:_concurrent) )
+			var rest:int = _currLoadFilesCount - _currLoadedFilesCount - _currLoadErrorFilesCount;
+			while (_currLoadingFilesCount < (_concurrent>rest ? rest:_concurrent) )
 			{
 				// 在本次加载队列中寻找一个【不在加载中】【没有加载成功】【没有加载出错】的文件进行加载操作
 				var readyFileVO:SLoaderFile = null;
@@ -339,9 +355,10 @@ package com.sloader
 						_currLoadErrorFiles.indexOf(file) == -1
 					){
 						_currLoadingFiles.push(file);
+						_currLoadingFilesCount = _currLoadingFiles.length;
+						
 						readyFileVO = file;
 						
-						// 更新loadInfo属性映射
 						if (!_loadInfo.currLoadingFiles)
 							_loadInfo.currLoadingFiles = [];
 						_loadInfo.currLoadingFiles.push(file);
