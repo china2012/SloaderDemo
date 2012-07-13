@@ -237,7 +237,7 @@ package com.sloader
 			
 			_loadInfo.loadedFilesCount = _loadedFiles.length;
 			
-			_currLoadedFilesCount = _loadedFiles.length;
+			_currLoadedFilesCount = _currLoadedFiles.length;
 			
 			var loadingIndex:int = _currLoadingFiles.indexOf(fileVO);
 			if (loadingIndex != -1)
