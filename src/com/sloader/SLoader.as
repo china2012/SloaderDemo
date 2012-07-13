@@ -19,7 +19,7 @@ package com.sloader
 		
 		private var _loadedBytes:Number;
 		
-		private const _concurrent:uint = 3;
+		private const _concurrent:uint = 2;
 		
 		////////////////////////////////////////////////////////////////////////
 		private var _isLoading:Boolean;
@@ -237,7 +237,7 @@ package com.sloader
 			
 			_loadInfo.loadedFilesCount = _loadedFiles.length;
 			
-			_currLoadedFilesCount = _loadedFiles.length;
+			_currLoadedFilesCount = _currLoadedFiles.length;
 			
 			var loadingIndex:int = _currLoadingFiles.indexOf(fileVO);
 			if (loadingIndex != -1)
@@ -325,6 +325,7 @@ package com.sloader
 		
 		private function onSloaderComplete():void
 		{
+			trace("onSloaderComplete",_currLoadingFiles.length);
 			executeHandlers(_eventHandlers[SLoaderEventType.SLOADER_COMPLETE], _loadInfo);
 		}
 		
